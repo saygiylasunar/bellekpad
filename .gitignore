@@ -1,0 +1,20 @@
+node_modules/
+dist/
+.vite/
+*.local
+.env
+.env.*
+!.env.example
+
+# BellekPad local exports / backups
+*.bellekpad
+*.bellekpad.json
+bellekpad-backup-*
+exports/
+backups/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

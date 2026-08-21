@@ -1,0 +1,18 @@
+{
+  "name": "BellekPad",
+  "short_name": "BellekPad",
+  "description": "Oyunsu ama ağır iş yapabilen local-first kişisel not ve yaşam sistemi.",
+  "lang": "tr",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ebe8e1",
+  "theme_color": "#30332e",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

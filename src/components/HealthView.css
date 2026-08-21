@@ -1,0 +1,45 @@
+.health-layout { display: grid; gap: 12px; }
+.health-card > p { margin: 13px 0; }
+.health-type {
+  display: inline-flex;
+  border-radius: 999px;
+  padding: 5px 8px;
+  background: #dfe6dc;
+  color: #60705c;
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+.health-type.medication { background: #e5dfd4; color: #756753; }
+.health-type.appointment { background: #dce4e7; color: #5c6e73; }
+.health-type.test { background: #e2dce6; color: #706078; }
+.health-type.observation { background: #e7e2d6; color: #746b55; }
+.health-form { display: grid; grid-template-columns: .8fr .8fr 1.2fr 1.5fr auto; gap: 7px; }
+.health-form input, .health-form select {
+  min-width: 0;
+  border: 1px solid rgba(48,50,46,.09);
+  border-radius: 9px;
+  padding: 9px 10px;
+  outline: 0;
+  background: rgba(255,255,255,.58);
+  color: #454740;
+  font-size: 10px;
+}
+.health-form button {
+  border: 0;
+  border-radius: 9px;
+  padding: 9px 12px;
+  background: #383b35;
+  color: #f5f3ed;
+  font-size: 10px;
+}
+.metric-small { font-size: 14px !important; line-height: 1.25; }
+@media (max-width: 900px) {
+  .health-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .health-form button { grid-column: 1 / -1; }
+}
+@media (max-width: 620px) {
+  .health-form { grid-template-columns: 1fr; }
+  .health-form button { grid-column: auto; }
+}
