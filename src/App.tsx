@@ -14,9 +14,10 @@ import {
   type FinanceData,
 } from './data/database'
 import { CORE_ENVIRONMENTS, type EntityRecord } from './domain/model'
+import { HealthView } from './components/HealthView'
 import { VaultView } from './components/VaultView'
 
-type ViewId = 'pad' | 'today' | 'project' | 'case' | 'finance' | 'inventory' | 'vault' | 'stats'
+type ViewId = 'pad' | 'today' | 'project' | 'case' | 'finance' | 'health' | 'inventory' | 'vault' | 'stats'
 
 const navigation: Array<{ id: ViewId; icon: string; label: string }> = [
   { id: 'pad', icon: '⌂', label: 'Pad' },
@@ -24,6 +25,7 @@ const navigation: Array<{ id: ViewId; icon: string; label: string }> = [
   { id: 'project', icon: '◇', label: 'Projeler' },
   { id: 'case', icon: '▣', label: 'Vakalar' },
   { id: 'finance', icon: '₺', label: 'Mali' },
+  { id: 'health', icon: '♡', label: 'Sağlık' },
   { id: 'inventory', icon: '◈', label: 'Envanter' },
   { id: 'vault', icon: '⌾', label: 'Kasa' },
   { id: 'stats', icon: '⌁', label: 'İstatistik' },
@@ -351,6 +353,10 @@ export function App() {
 
     if (activeView === 'project') {
       return <section className="module-list">{projectEntries.map((entry) => <ProjectCard key={entry.id} entry={entry} />)}{!projectEntries.length && <EmptyModule text="Bir kaydı Proje'ye dönüştür; ilerleme davranışları otomatik kazanılır." />}</section>
+    }
+
+    if (activeView === 'health') {
+      return <HealthView />
     }
 
     if (activeView === 'inventory') {
