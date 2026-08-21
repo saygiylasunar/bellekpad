@@ -24,3 +24,10 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Upload Netlify drop artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bellekpad-dist
+          path: dist
+          retention-days: 7
