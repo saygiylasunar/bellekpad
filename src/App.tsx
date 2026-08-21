@@ -14,8 +14,9 @@ import {
   type FinanceData,
 } from './data/database'
 import { CORE_ENVIRONMENTS, type EntityRecord } from './domain/model'
+import { VaultView } from './components/VaultView'
 
-type ViewId = 'pad' | 'today' | 'project' | 'case' | 'finance' | 'inventory' | 'stats'
+type ViewId = 'pad' | 'today' | 'project' | 'case' | 'finance' | 'inventory' | 'vault' | 'stats'
 
 const navigation: Array<{ id: ViewId; icon: string; label: string }> = [
   { id: 'pad', icon: '⌂', label: 'Pad' },
@@ -24,6 +25,7 @@ const navigation: Array<{ id: ViewId; icon: string; label: string }> = [
   { id: 'case', icon: '▣', label: 'Vakalar' },
   { id: 'finance', icon: '₺', label: 'Mali' },
   { id: 'inventory', icon: '◈', label: 'Envanter' },
+  { id: 'vault', icon: '⌾', label: 'Kasa' },
   { id: 'stats', icon: '⌁', label: 'İstatistik' },
 ]
 
@@ -361,6 +363,10 @@ export function App() {
           </section>
         </>
       )
+    }
+
+    if (activeView === 'vault') {
+      return <VaultView />
     }
 
     if (activeView === 'stats') {
