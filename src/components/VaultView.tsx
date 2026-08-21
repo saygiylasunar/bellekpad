@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../data/database'
 import { createCredential, unlockAllCredentials, type UnlockedCredential } from '../data/vault'
+import './VaultView.css'
 
 const emptyDraft = { title: '', username: '', password: '', url: '', notes: '' }
 
