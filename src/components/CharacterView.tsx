@@ -25,10 +25,12 @@ export function CharacterView() {
   const currentProfile = profileSetting?.value && typeof profileSetting.value === 'object'
     ? profileSetting.value as Record<string, unknown>
     : {}
+  const savedName = typeof currentProfile.name === 'string' ? currentProfile.name : 'Bellek Sahibi'
+  const savedTitle = typeof currentProfile.title === 'string' ? currentProfile.title : 'Kişisel Sistem Yöneticisi'
 
   const [editing, setEditing] = useState(false)
-  const [name, setName] = useState(typeof currentProfile.name === 'string' ? currentProfile.name : 'Bellek Sahibi')
-  const [title, setTitle] = useState(typeof currentProfile.title === 'string' ? currentProfile.title : 'Kişisel Sistem Yöneticisi')
+  const [name, setName] = useState('Bellek Sahibi')
+  const [title, setTitle] = useState('Kişisel Sistem Yöneticisi')
 
   const activeEntities = entities.filter((entry) => !entry.archivedAt)
   const archivedCount = entities.length - activeEntities.length
@@ -54,6 +56,12 @@ export function CharacterView() {
     { label: 'Kaynak', value: Math.min(100, inventoryEntries.length * 8), detail: `${inventoryEntries.length} envanter öğesi` },
   ]
 
+  function startEditing() {
+    setName(savedName)
+    setTitle(savedTitle)
+    setEditing(true)
+  }
+
   async function saveProfile() {
     await db.settings.put({
       key: 'character.profile',
@@ -66,7 +74,7 @@ export function CharacterView() {
   return (
     <div className="character-layout">
       <section className="character-hero">
-        <div className="character-avatar">{name.slice(0, 1).toLocaleUpperCase('tr-TR') || 'B'}</div>
+        <div className="character-avatar">{savedName.slice(0, 1).toLocaleUpperCase('tr-TR') || 'B'}</div>
         <div className="character-identity">
           <p className="eyebrow">Character Sheet · Local profile</p>
           {editing ? (
@@ -77,9 +85,9 @@ export function CharacterView() {
             </div>
           ) : (
             <>
-              <h2>{typeof currentProfile.name === 'string' ? currentProfile.name : name}</h2>
-              <p>{typeof currentProfile.title === 'string' ? currentProfile.title : title}</p>
-              <button className="character-edit-button" onClick={() => setEditing(true)}>Profili düzenle</button>
+              <h2>{savedName}</h2>
+              <p>{savedTitle}</p>
+              <button className="character-edit-button" onClick={startEditing}>Profili düzenle</button>
             </>
           )}
         </div>
