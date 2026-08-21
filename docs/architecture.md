@@ -1,32 +1,38 @@
 # BellekPad — Çekirdek Mimari
 
-## 1. Ürün tanımı
+## 1. Ürün kimliği
 
-BellekPad, sabit modüllerden oluşan bir not uygulaması değildir. Aynı gerçek verinin farklı **ortamlarda** farklı anlam, davranış, görünüm ve istatistik kazanabildiği local-first bir kişisel yönetim sistemidir.
+BellekPad'in ana fikri basit:
 
-Temel akış:
+> **Oyunsu ama ağır iş yapabilen bir notepad.**
+
+Kullanıcı ilk anda bir not uygulamasının rahatlığını görür; altında ise kişisel yaşam, proje, sağlık, finans, eğitim, parola kasası, envanter, zaman, istatistik ve ilişki motorları çalışır.
+
+BellekPad bir turnuva paneli, görev yöneticisi veya Notion klonu değildir. Bunların davranışlarını gerektiğinde üretebilen **kişisel kayıt ve durum motorudur**.
+
+Temel öncelik sırası:
 
 ```text
-Entity
-  ↓
-Environment
-  ↓
-Capability
-  ↓
-Event
-  ↓
-Projection / Derived State
-  ↓
-Metric / Analytics
-  ↓
-Lens / Dashboard
+Yaz / Kaydet
+    ↓
+Anlamlandır
+    ↓
+Bağla
+    ↓
+İzle
+    ↓
+Dönüştür
+    ↓
+Ölç / Görselleştir
 ```
+
+Kullanıcı veri tabanı tasarlamak zorunda kalmamalıdır.
 
 ## 2. Ana kavramlar
 
 ### Entity
 
-Kalıcı gerçek nesne. Bir kişi, harcama, ilaç, proje, maç, cihaz, ders, parola kaydı veya not olabilir.
+Kalıcı gerçek nesne. Bir not, kişi, harcama, ilaç, proje, cihaz, ders, parola kaydı, dosya veya olay olabilir.
 
 ```ts
 export interface Entity {
@@ -41,11 +47,11 @@ export interface Entity {
 }
 ```
 
-`kind` yalnızca temel kimlik/veri sınıfı için kullanılır. Uygulama davranışı yalnızca `kind` üzerinden hard-code edilmez.
+`kind` yalnızca başlangıç kimliğini verir. Uygulama davranışı tek başına `kind` üzerinden hard-code edilmez.
 
 ### Environment
 
-Bir Entity'nin nasıl yorumlandığını belirleyen davranış paketi.
+Bir Entity'nin hangi bağlamda nasıl yorumlanacağını belirleyen davranış paketi.
 
 ```ts
 export interface EnvironmentDefinition {
@@ -60,7 +66,7 @@ export interface EnvironmentDefinition {
 }
 ```
 
-Örnekler:
+Örnek ortamlar:
 
 - `core`
 - `temporal`
@@ -70,10 +76,10 @@ export interface EnvironmentDefinition {
 - `project`
 - `education`
 - `inventory`
-- `tournament`
 - `character`
+- `knowledge`
 
-Bir entity birden çok environment taşıyabilir. Örneğin hastane kontrolü aynı anda `health + temporal + case + finance` içinde yaşayabilir.
+Bir kayıt aynı anda birden çok ortamda yaşayabilir. Örneğin bir hastane kontrolü `health + temporal + case + finance` ortamlarında anlam kazanabilir.
 
 ### Capability
 
@@ -88,15 +94,15 @@ Environment'ın entity'ye kazandırdığı atomik davranış.
 - `measurable`
 - `inventoryItem`
 - `container`
-- `scoreable`
 - `relational`
 - `sensitive`
+- `progressable`
 
 UI mümkün olduğunca entity türünden değil capability'lerden türetilir.
 
 ### Event
 
-Sistemde gerçekleşmiş değişiklik veya gelişme.
+Gerçekleşmiş değişiklik veya gelişme.
 
 ```ts
 export interface DomainEvent<T = unknown> {
@@ -116,8 +122,8 @@ export interface DomainEvent<T = unknown> {
 - `case.updated`
 - `medication.taken`
 - `inventory.moved`
-- `match.played`
-- `transfer.completed`
+- `education.completed`
+- `milestone.reached`
 
 Timeline, audit, analytics ve geri alma için kritik değişikliklerde event geçmişi korunur.
 
@@ -131,12 +137,13 @@ export interface RelationRef {
 }
 ```
 
-Örnekler: `belongsTo`, `relatedTo`, `paidFor`, `participantOf`, `assignedTo`, `storedIn`, `dependsOn`.
+Örnekler: `belongsTo`, `relatedTo`, `paidFor`, `assignedTo`, `storedIn`, `dependsOn`, `createdFrom`.
 
 ### Lens
 
-Aynı verinin farklı görsel/etkileşimsel sunumu. Lens veri modelini değiştirmez.
+Aynı verinin farklı görsel ve etkileşimsel sunumu. Lens veri modelini değiştirmez.
 
+- Note / Editor
 - Card
 - Table
 - Timeline
@@ -145,18 +152,18 @@ Aynı verinin farklı görsel/etkileşimsel sunumu. Lens veri modelini değişti
 - Graph
 - Dashboard
 - Character Sheet
-- Fixture Board
 - Spatial Inventory
+- Gallery
 
 ## 3. Environment dönüşümü
 
-Environment'lar arasında üç farklı davranış bulunur.
+Environment'lar arasında üç davranış bulunur.
 
 ### Projection
 
 Kaynak veri değişmeden başka ortamın lensiyle gösterilir.
 
-Örnek: Inventory item → Finance görünümü.
+Örnek: bir cihaz Inventory'de ekipman, Finance'ta varlık/harcama olarak görünür.
 
 ### Promotion
 
@@ -203,101 +210,88 @@ Yeni her kullanım için yeni variable türü üretilmez. Atomik field havuzu k�
 
 Semantik ağırlık Environment üzerinde taşınır.
 
-## 5. Zade Haxball yaklaşımının BellekPad'e çevrilmesi
+## 5. Capture-first davranışı
 
-Referans: `https://zade-haxball.netlify.app/`
+BellekPad'i açan kullanıcı önce yazabilmelidir.
 
-Zade Haxball Ligi BellekPad için bir spor modülü olarak değil, **yaşayan yönetim paneli davranışının referansı** olarak kullanılır.
-
-Temel fikir:
+Örnek hızlı girişler:
 
 ```text
-Kullanıcı olay girer
-        ↓
-Event kaydı oluşur
-        ↓
-İlgili entity'lerin durumu türetilir
-        ↓
-Tablolar ve sıralamalar güncellenir
-        ↓
-Timeline / istatistik / dashboard yenilenir
+-450 market
+12 Eylül dahiliye kontrolü
+X projesi için yeni fikir: ...
+Bu şifreyi kasaya al
+Yeni milestone: ...
 ```
 
-Turnuva örneğinde:
+Sistem bunları daha sonra ilgili environment'lara bağlayabilir veya kullanıcı tek hareketle dönüştürebilir.
+
+Amaç:
+
+> **Önce yakala, sonra düzenle.**
+
+## 6. Yaşayan durum motoru
+
+BellekPad yalnızca CRUD ekranları üretmez. Bir gelişme kaydedildiğinde ilişkili durum ve istatistikler türetilebilir.
 
 ```text
-MatchResultEntered
-  ├─ Fixture → played
-  ├─ Team → W/D/L değişir
-  ├─ Standings → yeniden hesaplanır
-  ├─ PlayerStats → gol/asist vb. artar
-  ├─ Timeline → maç olayı eklenir
-  └─ Dashboard → form/puan/istatistik yenilenir
+Event
+  ↓
+Derived State
+  ↓
+Relations
+  ↓
+Metrics
+  ↓
+Timeline / Dashboard / Alerts
 ```
 
-Aynı motor farklı ortamlarda:
+Örnekler:
 
 ```text
-HospitalResultEntered
-  ├─ Case status
-  ├─ Health timeline
-  ├─ Next action
-  └─ Metrics
-
 ExpenseRecorded
   ├─ Account balance
-  ├─ Budget consumption
-  ├─ Project cost
-  └─ Monthly analytics
+  ├─ Monthly spending
+  ├─ Budget usage
+  └─ Project cost
 
-CourseCompleted
-  ├─ Education progress
-  ├─ Skill relation
-  ├─ Milestone
-  └─ Statistics
+HospitalResultRecorded
+  ├─ Case timeline
+  ├─ Latest health state
+  ├─ Next action
+  └─ Related documents
+
+TaskCompleted
+  ├─ Project progress
+  ├─ Character XP (opsiyonel)
+  ├─ Completion statistics
+  └─ Timeline
 ```
 
-Bu nedenle BellekPad'in merkezinde CRUD ekranları değil **Event → Derived State** zinciri bulunur.
+Bu motor gerektiğinde fikstür/lig/puan tablosu gibi özel simülasyonları da taşıyabilir; ancak ürünün merkezi değildir.
 
-## 6. Tournament environment — stres testi
+## 7. Oyunsuluk
 
-### Entities
+Gamification çocuklaştırıcı olmamalıdır. Görsel dil **soft, sakin, premium ve araçsal** kalır.
 
-- Season
-- Team
-- Participant
-- Match
-- SquadMembership
-- Transfer
-- CompetitionRule
+Oyunsu katmanlar:
 
-### Events
+- Character Sheet
+- XP / seviye (opsiyonel)
+- Milestone
+- Quest / kritik hedef
+- Inventory
+- Collections
+- Streak yerine anlamlı continuity ölçümleri
+- Progress bars
+- Status badges
+- Achievement / record cards
 
-- `season.created`
-- `player.registered`
-- `squad.joined`
-- `transfer.completed`
-- `match.scheduled`
-- `match.played`
-- `goal.recorded`
-- `assist.recorded`
-- `card.recorded`
+Kullanıcı bu katmanları kapatabilir.
 
-### Derived views
+## 8. Spatial Inventory lens
 
-- Fixture
-- Standings
-- Form table
-- Player leaderboard
-- Team detail
-- Transfer log
-- Activity timeline
-
-Bu yapı çalışıyorsa aynı çekirdek Project/Case/Finance/Health gibi daha genel kullanım alanlarını da taşıyabilir.
-
-## 7. Spatial Inventory lens
-
-Tarkov/Duckov esintisi yalnızca görsel süs değil, gerçek bir **spatial inventory lens** olacaktır.
+Tarkov/Duckov esintisi bir tema değil, alternatif bir **mekânsal envanter görünümüdür**.
 
 ```ts
 export interface InventoryPlacement {
@@ -311,7 +305,7 @@ export interface InventoryPlacement {
 }
 ```
 
-Bir inventory item hem tablo/listede hem de grid üzerinde gösterilebilir.
+Bir item aynı anda liste, tablo, kart veya spatial grid ile görüntülenebilir.
 
 Container örnekleri:
 
@@ -323,9 +317,26 @@ Container örnekleri:
 - Document Folder
 - Wallet
 
-Grid lens opsiyoneldir. Finans kaydı veya ilaç gibi her entity zorla spatial inventory'ye sokulmaz.
+Bu lens yalnızca gerçekten anlamlı olduğu alanlarda açılır.
 
-## 8. Local-first veri katmanı
+## 9. Soft UI ilkeleri
+
+BellekPad oyun HUD'ı gibi bağırmamalı; üretkenlik aracı gibi sakin kalmalıdır.
+
+- düşük görsel gürültü
+- yumuşak yüzeyler
+- compact ama boğucu olmayan bilgi yoğunluğu
+- güçlü klavye kullanımı
+- sürükle-bırak destekli lensler
+- hızlı arama ve command palette
+- context-sensitive actions
+- modüler dashboard
+- koyu/açık tema
+- erişilebilir kontrast
+
+Oyunsuluk **işlev biçiminde**, dekorasyon biçiminde değil.
+
+## 10. Local-first veri katmanı
 
 ```text
 React UI
@@ -343,15 +354,18 @@ Hassas alanlar ayrı encrypted vault adapter üzerinden saklanır.
 
 Bulut sync daha sonra opsiyonel adapter olarak eklenir; çekirdeğin çalışması için zorunlu değildir.
 
-## 9. İlk teknik hedef
+## 11. İlk teknik hedef
 
 İlk çalışan sürüm şunları kanıtlamalıdır:
 
-1. Entity oluşturma.
-2. Entity'ye birden fazla environment bağlama.
-3. Event ekleyip derived state üretme.
-4. Aynı veriyi en az iki farklı lens ile gösterme.
-5. Tournament örneğinde maç sonucu → puan tablosu otomasyonu.
-6. Inventory örneğinde liste ↔ spatial grid geçişi.
-7. Veriyi IndexedDB'de local-first saklama.
-8. Netlify'a statik build olarak deploy edilebilme.
+1. Hızlı not yakalama ve editör.
+2. Entity oluşturma.
+3. Entity'ye birden fazla environment bağlama.
+4. Event ekleyip derived state üretme.
+5. Aynı veriyi en az iki farklı lens ile gösterme.
+6. Character Sheet / personal dashboard prototipi.
+7. Inventory'de liste ↔ spatial grid geçişi.
+8. Finans için temel transaction + aylık analytics.
+9. Timeline / milestone sistemi.
+10. IndexedDB local-first saklama.
+11. Netlify'a statik build olarak deploy edilebilme.
