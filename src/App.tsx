@@ -14,14 +14,16 @@ import {
   type FinanceData,
 } from './data/database'
 import { CORE_ENVIRONMENTS, type EntityRecord } from './domain/model'
+import { CharacterView } from './components/CharacterView'
 import { HealthView } from './components/HealthView'
 import { VaultView } from './components/VaultView'
 
-type ViewId = 'pad' | 'today' | 'project' | 'case' | 'finance' | 'health' | 'inventory' | 'vault' | 'stats'
+type ViewId = 'pad' | 'today' | 'character' | 'project' | 'case' | 'finance' | 'health' | 'inventory' | 'vault' | 'stats'
 
 const navigation: Array<{ id: ViewId; icon: string; label: string }> = [
   { id: 'pad', icon: '⌂', label: 'Pad' },
   { id: 'today', icon: '◫', label: 'Bugün' },
+  { id: 'character', icon: '◉', label: 'Karakter' },
   { id: 'project', icon: '◇', label: 'Projeler' },
   { id: 'case', icon: '▣', label: 'Vakalar' },
   { id: 'finance', icon: '₺', label: 'Mali' },
@@ -326,6 +328,10 @@ export function App() {
   const todayEntries = entries.filter((entry) => new Date(entry.updatedAt).toDateString() === todayKey)
 
   function renderView() {
+    if (activeView === 'character') {
+      return <CharacterView />
+    }
+
     if (activeView === 'finance') {
       return (
         <>
