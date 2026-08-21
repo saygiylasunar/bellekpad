@@ -252,12 +252,7 @@ export async function importBackup(raw: string): Promise<void> {
 
   await db.transaction(
     'rw',
-    db.entities,
-    db.events,
-    db.relations,
-    db.settings,
-    db.vault,
-    db.attachments,
+    [db.entities, db.events, db.relations, db.settings, db.vault, db.attachments],
     async () => {
       await Promise.all([
         db.entities.clear(),
