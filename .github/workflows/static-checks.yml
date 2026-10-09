@@ -1,0 +1,25 @@
+name: BellekPad Static Checks
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "index.html"
+      - "app.js"
+      - "styles.css"
+      - "scripts/**"
+      - ".github/workflows/static-checks.yml"
+  pull_request:
+
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: JavaScript syntax
+        run: node --check app.js
+      - name: Static DOM integration
+        run: node scripts/check-contract.mjs
