@@ -175,6 +175,14 @@
       : "local-" + Date.now() + "-" + Math.random().toString(36).slice(2);
   }
 
+  // Capture a note without leaving the keyboard (Ctrl/Cmd + Enter).
+  // requestSubmit retains native required-field validation.
+  form.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" || !(event.ctrlKey || event.metaKey)) return;
+    event.preventDefault();
+    form.requestSubmit();
+  });
+
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     const title = byId("title").value.trim();
