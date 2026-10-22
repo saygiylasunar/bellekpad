@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  assertDocument, graphemes, blockLength, normalizePoint, pointFromRun,
+  assertDocument, assertGraphemeAlignedRuns, graphemes, blockLength, normalizePoint, pointFromRun,
   runFromPoint, comparePoints, normalizeSelection, moveCaret,
   selectedFragments, selectedText, rebaseSelection
 } from "../src/editor/g06a-selection.mjs";
@@ -161,4 +161,28 @@ test("reading a mixed-format selection cannot mutate original run marks", () => 
 test("invalid directions and malformed selection fail explicitly", () => {
   assert.throws(() => moveCaret(document(), sel(p("a", 0), p("a", 0)), "north"), /direction/);
   assert.throws(() => normalizeSelection(document(), { anchor: p("a", 0) }), /anchor and focus/);
+});
+
+test("imported formatting runs cannot split a combining glyph or ZWJ sequence", () => {
+  const valid = { blocks: [{ id: "safe", runs: [
+    { text: "a\u0301" }, { text: "👩‍💻" }, { text: "🇹🇷" }
+  ] }] };
+  assert.doesNotThrow(() => assertGraphemeAlignedRuns(valid));
+  assert.throws(() => assertGraphemeAlignedRuns({ blocks: [
+    { id: "broken", runs: [{ text: "a" }, { text: "\u0301" }] }
+  ] }), /splits a Unicode grapheme/);
+  assert.throws(() => assertGraphemeAlignedRuns({ blocks: [
+    { id: "brokenEmoji", runs: [{ text: "👩" }, { text: "‍💻" }] }
+  ] }), /splits a Unicode grapheme/);
+});
+
+test("selected fragments deep-copy nested style attributes without mutations", () => {
+  const doc = document();
+  doc.blocks[0].runs[0].marks = [{ name: "bold", attrs: { role: "emphasis" } }];
+  doc.blocks[0].runs[0].attributes = { font: { size: 14 } };
+  const original = structuredClone(doc);
+  const fragments = selectedFragments(doc, sel(p("a", 0), p("a", 2)));
+  fragments[0].runs[0].marks[0].attrs.role = "mutated";
+  fragments[0].runs[0].attributes.font.size = 999;
+  assert.deepEqual(doc, original);
 });
