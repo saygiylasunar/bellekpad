@@ -8,7 +8,7 @@
  * Invariant: formatting runs must not split a single grapheme cluster.
  * A canonical G0.5 adapter must preserve/normalize this invariant.
  */
-import { assertDocument, graphemes, pointFromRun, runFromPoint } from "./g06a-selection.mjs";
+import { assertGraphemeAlignedRuns, graphemes, pointFromRun, runFromPoint } from "./g06a-selection.mjs";
 
 function assertBias(bias) {
   if (bias !== "backward" && bias !== "forward") {
@@ -56,7 +56,7 @@ export function utf16ToGrapheme(text, offset, bias = "backward") {
 }
 
 function findRun(doc, blockId, runIndex) {
-  assertDocument(doc);
+  assertGraphemeAlignedRuns(doc);
   const block = doc.blocks.find((entry) => entry.id === blockId);
   if (!block) throw new RangeError("Unknown block ID: " + blockId);
   if (!Number.isSafeInteger(runIndex) || runIndex < 0 || runIndex >= block.runs.length) {
