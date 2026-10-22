@@ -2,12 +2,14 @@ name: BellekPad Static Checks
 
 on:
   push:
-    branches: [main]
+    branches: [main, "wip/g0.6a-selection-core"]
     paths:
       - "index.html"
       - "app.js"
       - "styles.css"
       - "scripts/**"
+      - "src/editor/**"
+      - "tests/**"
       - ".github/workflows/static-checks.yml"
   pull_request:
 
@@ -20,6 +22,12 @@ jobs:
         with:
           node-version: "22"
       - name: JavaScript syntax
-        run: node --check app.js
+        run: |
+          node --check app.js
+          node --check src/editor/g06a-selection.mjs
+          node --check src/editor/g06a-utf16.mjs
+          node --check src/editor/g06a-navigation.mjs
       - name: Static DOM integration
         run: node scripts/check-contract.mjs
+      - name: G0.6A editor selection regression tests
+        run: node --test tests/g06a-selection.test.mjs tests/g06a-adapters.test.mjs
