@@ -25,7 +25,9 @@ jobs:
         run: |
           node --check app.js
           node --check src/editor/g06a-selection.mjs
+          node --check src/editor/g06a-utf16.mjs
+          node --check src/editor/g06a-navigation.mjs
       - name: Static DOM integration
         run: node scripts/check-contract.mjs
       - name: G0.6A editor selection regression tests
-        run: node --test tests/g06a-selection.test.mjs
+        run: node --test tests/g06a-selection.test.mjs tests/g06a-adapters.test.mjs
