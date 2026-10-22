@@ -32,6 +32,28 @@ export function assertDocument(doc) {
   return doc;
 }
 
+/**
+ * Validate that formatting run boundaries do not bisect a Unicode grapheme.
+ * Do this at the editor adapter boundary (e.g. after import), rather than on
+ * every keystroke. A styled grapheme cannot be assigned two logical offsets.
+ */
+export function assertGraphemeAlignedRuns(doc) {
+  assertDocument(doc);
+  for (const block of doc.blocks) {
+    const joined = block.runs.map((run) => run.text).join("");
+    const stops = new Set([0, joined.length]);
+    for (const part of segmenter.segment(joined)) stops.add(part.index);
+    let offset = 0;
+    for (const run of block.runs) {
+      offset += run.text.length;
+      if (!stops.has(offset)) {
+        throw new TypeError("A formatting run boundary splits a Unicode grapheme in block " + block.id);
+      }
+    }
+  }
+  return doc;
+}
+
 export function blockLength(block) {
   if (!block || !Array.isArray(block.runs)) throw new TypeError("Invalid block");
   return block.runs.reduce((sum, run) => sum + graphemes(run.text).length, 0);
@@ -165,8 +187,10 @@ export function selectedFragments(doc, selection) {
       const left = Math.max(0, from - position);
       const right = Math.min(units.length, to - position);
       if (right > left) {
-        const copy = { ...run, text: units.slice(left, right).join("") };
-        if (Array.isArray(run.marks)) copy.marks = [...run.marks];
+        // A fragment must not share mutable marks/attributes with stored data.
+        // Editor runs are serialized data objects (structured clone-safe).
+        const copy = structuredClone(run);
+        copy.text = units.slice(left, right).join("");
         runs.push(copy);
       }
       position += units.length;
